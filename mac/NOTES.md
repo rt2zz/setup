@@ -36,6 +36,9 @@ defaults write com.apple.screencapture location ~/Screenshots
 # allow text selection in quick look
 defaults write com.apple.finder QLEnableTextSelection -bool true
 
+# misc (show hidden files)
+defaults write com.apple.finder AppleShowAllFiles YES; 
+
 # apply all
 killall Finder
 killall Dock
