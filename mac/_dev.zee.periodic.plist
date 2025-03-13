@@ -12,7 +12,15 @@
   <key>RunAtLoad</key>
   <true/>
   <key>StartInterval</key>
-  <integer>10</integer>
+  <integer>3600</integer>
+  <!-- optional debugging  -->
+  <!--
+  <key>StandardOutPath</key>
+  <string>/tmp/periodic.out.log</string>
+
+  <key>StandardErrorPath</key>
+  <string>/tmp/periodic.err.log</string> 
+  -->
 </dict>
 </plist>
 
