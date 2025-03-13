@@ -1,6 +1,14 @@
 #!/bin/bash
 git add -A
 git commit -m "auto-commit $(date +"%Y-%m-%d %H:%M:%S")"
+
+# Try to push and capture the exit status
 if ! git push origin/test main; then
-    osascript -e 'display notification "Repo sync failed" with title "Error"'
+    echo "Push failed, attempting to show notification..."
+    # Try to show notification and capture any errors
+    if ! osascript -e 'display notification "Repo sync failed" with title "Error"'; then
+        echo "Failed to show notification"
+    else
+        echo "Notification should have been shown"
+    fi
 fi
