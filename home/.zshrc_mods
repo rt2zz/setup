@@ -1,0 +1,69 @@
+# Personal zsh modifications
+# Sourced from .zshrc after plugins are loaded
+
+# Override zsh-jj's VCS_INFO_get_data_jj to also show workspace and commit description
+# The default plugin only shows bookmarks and change id. This adds:
+#   - workspace: which jj workspace you're in
+#   - desc: first line of commit description (truncated to 30 chars)
+VCS_INFO_get_data_jj() {
+  setopt localoptions NO_shwordsplit
+  local action branch base staged unstaged revision misc
+  local jj_info
+
+  jj_info=$(jj log --ignore-working-copy -n 1 --no-graph --color never -r "@" \
+    -T 'separate(" ",
+      "revision=\"" ++ change_id.shortest() ++ "\"",
+      "branch=\"" ++ coalesce(bookmarks.join(" "), "") ++ "\"",
+      if(empty, "", "unstaged=true"),
+      if(conflict, "action=conflict"),
+      "workspace=\"" ++ working_copies.join(",") ++ "\"",
+      "desc=\"" ++ description.first_line().substr(0, 30) ++ "\""
+    )' 2>/dev/null) || return 1
+
+  eval "$jj_info"
+  misc="${workspace}: ${desc:-(no description set)}"
+
+  VCS_INFO_formats "${action}" "${branch}" "${base}" "${staged}" "${unstaged}" "${revision}" "${misc}"
+}
+
+# Format for jj: (jj [unstaged] bookmark) workspace: description
+# %s=system (jj), %b=branch/bookmark, %u=unstaged, %m=misc (workspace+desc)
+zstyle ':vcs_info:jj:*' formats " %{$fg[blue]%}(%s %{$fg[red]%}%u%{$fg[magenta]%}%b%{$fg[blue]%})%{$reset_color%} %F{245}%m%f"
+
+# Put input on a new line, indented with arrow to distinguish from stdout
+PROMPT+=$'\n'"  %(?:%{$fg[green]%}➜:%{$fg[red]%}➜)%{$reset_color%} "
+
+# Shortened jj status - shows first 10 lines with "... more" hint if truncated
+jj-short-status() {
+  local out=$(jj --no-pager status --color=always)
+  echo "$out" | head -10
+  [ $(echo "$out" | wc -l) -gt 10 ] && echo "... more"
+}
+
+# Magic enter commands for different repo types
+MAGIC_ENTER_JJ_COMMAND='jj-short-status'
+MAGIC_ENTER_GIT_COMMAND='git status -u .'
+MAGIC_ENTER_OTHER_COMMAND='ls -lh .'
+
+# jj-aware magic-enter (checks jj first, then git, then fallback)
+# Runs configured command when pressing Enter on empty command line
+magic-enter() {
+  if [[ -n "$BUFFER" || "$CONTEXT" != start ]]; then
+    return
+  fi
+
+  if jj root &>/dev/null; then
+    BUFFER="$MAGIC_ENTER_JJ_COMMAND"
+  elif command git rev-parse --is-inside-work-tree &>/dev/null; then
+    BUFFER="$MAGIC_ENTER_GIT_COMMAND"
+  else
+    BUFFER="$MAGIC_ENTER_OTHER_COMMAND"
+  fi
+}
+
+# Wire up magic-enter to the accept-line widget (Enter key)
+_magic-enter-accept-line() {
+  magic-enter
+  zle .accept-line
+}
+zle -N accept-line _magic-enter-accept-line
