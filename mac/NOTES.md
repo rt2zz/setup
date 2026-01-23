@@ -1,9 +1,8 @@
 # Mac Setup Notes
 
 ## Terminal Setup
-Notes (should script in future):
-- zsh / ohmyzsh
-- (non-mac) [reference setup script](https://github.com/TaiPhamD/zsh_addons/blob/main/install.sh)
+- zsh with [zap](https://github.com/zap-zsh/zap) plugin manager
+- See [~/home](../home/) for config files
 
 ## Mac Settings
 ### UI Settings
