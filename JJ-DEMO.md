@@ -1,1 +1,1 @@
-hello @setup-prime world
+hello @default world
