@@ -11,9 +11,7 @@ plug "zap-zsh/supercharge"
 plug "zap-zsh/zap-prompt"
 plug "rkh/zsh-jj"
 plug "zsh-users/zsh-syntax-highlighting"
-
-# Load degit plugin (git-to-jj translator)
-source ~/dev/setup/home/degit/degit.plugin.zsh
+plug "rt2zz/degit"
 
 # --- Completion System ---
 autoload -Uz compinit
