@@ -4,6 +4,19 @@
 # --- Keybindings ---
 bindkey '^[^M' autosuggest-execute
 
+# claude in yolo mode
+clawd () {
+  # Don't inject YOLO flag for subcommands where it may not be accepted/desired.
+  case "$1" in
+    update|mcp|-v|--version|help|--help)
+      command claude "$@"
+      ;;
+    *)
+      command claude --dangerously-skip-permissions "$@"
+      ;;
+  esac
+}
+
 # Override zsh-jj's VCS_INFO_get_data_jj to also show workspace and commit description
 # The default plugin only shows bookmarks and change id. This adds:
 #   - workspace: which jj workspace you're in
@@ -24,17 +37,53 @@ VCS_INFO_get_data_jj() {
     )' 2>/dev/null) || return 1
 
   eval "$jj_info"
-  misc="${workspace}: ${desc:-(no description set)}"
+  misc="${desc:-(no description set)}"
 
   VCS_INFO_formats "${action}" "${branch}" "${base}" "${staged}" "${unstaged}" "${revision}" "${misc}"
 }
 
 # Format for jj: (jj [unstaged] bookmark) workspace: description
 # %s=system (jj), %b=branch/bookmark, %u=unstaged, %m=misc (workspace+desc)
-zstyle ':vcs_info:jj:*' formats " %{$fg[blue]%}(%s %{$fg[red]%}%u%{$fg[magenta]%}%b%{$fg[blue]%})%{$reset_color%} %F{245}%m%f"
+zstyle ':vcs_info:jj:*' formats " %F{245}%m%f"
 
+# Custom path display for ~/dev directories
+# Shows ｢devSubDir·workspace｣ cwdName when in ~/dev with jj, otherwise shows current dir name
+dev_path_prompt() {
+  local cwd="$PWD"
+  local dev_prefix="$HOME/dev"
+  local purple="%{$fg[magenta]%}"
+  local cyan="%{$fg[cyan]%}"
+  local reset="%{$reset_color%}"
+
+  if [[ "$cwd" == "$dev_prefix"/* ]]; then
+    local rel="${cwd#$dev_prefix/}"
+    local dev_sub="${rel%%/*}"
+    local cwd_name="${cwd:t}"
+
+    # Check for jj workspace
+    local jj_workspace
+    jj_workspace=$(jj log --ignore-working-copy -n 1 --no-graph --color never -r "@" -T 'working_copies.join(",")' 2>/dev/null | sed 's/@$//')
+
+    local bracket_content="${dev_sub}"
+    [[ -n "$jj_workspace" && "$jj_workspace" != "default" ]] && bracket_content+="·${jj_workspace}"
+
+    if [[ "$dev_sub" == "$cwd_name" ]]; then
+      print -P "${purple}｢${bracket_content}｣${reset}"
+    else
+      print -P "${purple}｢${bracket_content}｣${reset} ${cyan}${cwd_name}${reset}"
+    fi
+  elif [[ "$cwd" == "$dev_prefix" ]]; then
+    print -P "${purple}｢dev｣${reset}"
+  else
+    print -P "${cyan}%c${reset}"
+  fi
+}
+
+# Rebuild prompt with custom dev path display
 # Put input on a new line, indented with arrow to distinguish from stdout
-PROMPT+=$'\n'"  %(?:%{$fg[green]%}➜:%{$fg[red]%}➜)%{$reset_color%} "
+PROMPT="%B%{$fg[yellow]%}⚡%{$reset_color%} \$(dev_path_prompt)"
+PROMPT+="\$vcs_info_msg_0_"
+PROMPT+=$'\n'"    %(?:%{$fg[green]%}➜:%{$fg[red]%}➜)%{$reset_color%} "
 
 # Shortened jj status - shows first 10 lines with "... more" hint if truncated
 jj-short-status() {
@@ -70,3 +119,37 @@ _magic-enter-accept-line() {
   zle .accept-line
 }
 zle -N accept-line _magic-enter-accept-line
+
+# --- Terminal Title ---
+# Sets Ghostty tab title to ｢devSubDir·workspace｣ description when in ~/dev
+autoload -Uz add-zsh-hook
+
+_ghostty_title_precmd() {
+  local cwd="$PWD"
+  local dev_prefix="$HOME/dev"
+  local title
+
+  if [[ "$cwd" == "$dev_prefix"/* ]]; then
+    local rel="${cwd#$dev_prefix/}"
+    local dev_sub="${rel%%/*}"
+
+    local jj_workspace jj_desc
+    jj_workspace=$(jj log --ignore-working-copy -n 1 --no-graph --color never -r "@" -T 'working_copies.join(",")' 2>/dev/null | sed 's/@$//')
+    jj_desc=$(jj log --ignore-working-copy -n 1 --no-graph --color never -r "@" -T 'description.first_line().substr(0, 30)' 2>/dev/null)
+
+    local bracket_content="${dev_sub}"
+    [[ -n "$jj_workspace" && "$jj_workspace" != "default" ]] && bracket_content+="·${jj_workspace}"
+
+    if [[ -n "$jj_desc" ]]; then
+      title="｢${bracket_content}｣ ${jj_desc}"
+    else
+      title="｢${bracket_content}｣"
+    fi
+  elif [[ "$cwd" == "$dev_prefix" ]]; then
+    title="｢dev｣"
+  fi
+
+  [[ -n "$title" ]] && print -Pn "\e]2;${title}\a"
+}
+
+add-zsh-hook precmd _ghostty_title_precmd
