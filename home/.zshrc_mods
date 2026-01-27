@@ -1,6 +1,9 @@
 # Personal zsh modifications
 # Sourced from .zshrc after plugins are loaded
 
+# --- Keybindings ---
+bindkey '^[^M' autosuggest-execute
+
 # Override zsh-jj's VCS_INFO_get_data_jj to also show workspace and commit description
 # The default plugin only shows bookmarks and change id. This adds:
 #   - workspace: which jj workspace you're in
