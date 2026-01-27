@@ -38,7 +38,7 @@ _degit_stop_spinner() {
     wait "$pid" 2>/dev/null
   fi
   printf '\r\033[K'  # Clear the line
-}
+} 2>/dev/null
 
 # System prompt for the LLM (translation mode)
 _degit_system_prompt() {
@@ -89,9 +89,10 @@ Translate the given git command to its jj equivalent. Be terse.
 </jj_reference>
 
 <output_rules>
-- jjEquivalent: exact jj command to run, or null if no direct equivalent
+- jjEquivalent: full executable command starting with `jj`, or null if no direct equivalent
 - explanation: one sentence max explaining the translation
 - Preserve user's arguments (paths, refs, messages) in the translation
+- Use <placeholder> syntax for any values the user must fill in (e.g., `jj new <rev>`)
 </output_rules>
 EOF
 }
@@ -373,9 +374,11 @@ _degit_intercept() {
     return $?
   fi
 
-  # Start spinner in background
+  # Start spinner in background (suppress job control output)
+  setopt local_options no_monitor no_notify
   _degit_show_spinner &
   spinner_pid=$!
+  disown $spinner_pid 2>/dev/null
 
   # Call OpenAI
   local response
@@ -466,8 +469,9 @@ User asks: $query
 </jj_reference>
 
 <output_rules>
-- jjEquivalent: if a specific command answers the question, provide it; otherwise null
+- jjEquivalent: full executable command starting with `jj`, or null if no specific command applies
 - explanation: 2-3 sentences max answering the question directly
+- Use <placeholder> syntax for any values the user must fill in (e.g., `jj rebase -d <destination>`)
 </output_rules>
 EOF
 }
@@ -503,9 +507,11 @@ _degit_query() {
   local system_prompt
   system_prompt=$(_degit_query_system_prompt "$git_command" "$user_query")
 
-  # Start spinner
+  # Start spinner in background (suppress job control output)
+  setopt local_options no_monitor no_notify
   _degit_show_spinner &
   spinner_pid=$!
+  disown $spinner_pid 2>/dev/null
 
   # Call OpenAI
   local response
