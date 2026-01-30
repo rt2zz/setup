@@ -1,0 +1,5 @@
+font-size = 16
+shell-integration-features = no-title
+keybind = shift+enter=text:\n
+window-save-state = always
+
