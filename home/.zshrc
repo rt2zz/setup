@@ -18,8 +18,8 @@ autoload -Uz compinit
 compinit
 
 # --- Personal Customizations ---
-source ~/dev/setup/home/.zshrc_mods
-source ~/dev/setup/home/.profile
+source "$HOME/dev/setup/home/.zshrc_mods"
+source "$HOME/dev/setup/home/.profile"
 
 # Section where managed machine-specific config typically goes
 # --- nvm ---

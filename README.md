@@ -1,0 +1,2 @@
+## mac
+`./mac/setup.sh`
