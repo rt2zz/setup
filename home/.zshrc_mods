@@ -153,3 +153,40 @@ _ghostty_title_precmd() {
 }
 
 add-zsh-hook precmd _ghostty_title_precmd
+
+### jump function for enhanced ux around cd/z ###
+j() {
+  # Usage: jump <query terms...>
+  if [ $# -eq 0 ]; then
+    echo "usage: jump <query>" >&2
+    return 2
+  fi
+
+  # Get all matches (newline-separated). If there are no matches, list is empty.
+  local matches
+  matches="$(zoxide query -l -- "$@")" || return $?
+
+  # Count matches
+  local count
+  count="$(printf '%s\n' "$matches" | sed '/^$/d' | wc -l | tr -d ' ')"
+
+  if [ "$count" -eq 1 ]; then
+    # Exactly one destination
+    local dest
+    dest="$(printf '%s\n' "$matches" | sed -n '1p')"
+
+    # Echo where we're going, then cd
+    printf '→ %s\n' "$dest"
+    cd -- "$dest"
+  else
+    # 0 or many: interactive picker (requires fzf for --interactive)
+    local dest
+    dest="$(zoxide query --interactive -- "$@")" || return $?
+
+    # If user cancels fzf, dest will be empty
+    if [ -n "$dest" ]; then
+      printf '→ %s\n' "$dest"
+      cd -- "$dest"
+    fi
+  fi
+}

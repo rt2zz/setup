@@ -45,7 +45,7 @@ cp "$REPO_ROOT/home/.zshrc" ~/.zshrc
 
 # Copy Ghostty config
 mkdir -p ~/Library/Application\ Support/com.mitchellh.ghostty
-cp "$REPO_ROOT/home/Library/Application\ Support/com.mitchellh.ghostty/config" ~/Library/Application\ Support/com.mitchellh.ghostty/config
+cp "$REPO_ROOT/home/Library/Application Support/com.mitchellh.ghostty/config" ~/Library/Application\ Support/com.mitchellh.ghostty/config
 
 # Mac settings
 defaults write com.apple.dock autohide -bool true
