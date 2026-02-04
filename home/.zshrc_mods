@@ -37,6 +37,7 @@ VCS_INFO_get_data_jj() {
     )' 2>/dev/null) || return 1
 
   eval "$jj_info"
+  workspace="${workspace//,/+}"
   misc="${desc:-(no description set)}"
 
   VCS_INFO_formats "${action}" "${branch}" "${base}" "${staged}" "${unstaged}" "${revision}" "${misc}"
@@ -62,7 +63,7 @@ dev_path_prompt() {
 
     # Check for jj workspace
     local jj_workspace
-    jj_workspace=$(jj log --ignore-working-copy -n 1 --no-graph --color never -r "@" -T 'working_copies.join(",")' 2>/dev/null | sed 's/@$//')
+    jj_workspace=$(jj log --ignore-working-copy -n 1 --no-graph --color never -r "@" -T 'working_copies.join(",")' 2>/dev/null | sed 's/,/+/g')
 
     local bracket_content="${dev_sub}"
     [[ -n "$jj_workspace" && "$jj_workspace" != "default" ]] && bracket_content+="·${jj_workspace}"
@@ -134,7 +135,7 @@ _ghostty_title_precmd() {
     local dev_sub="${rel%%/*}"
 
     local jj_workspace jj_desc
-    jj_workspace=$(jj log --ignore-working-copy -n 1 --no-graph --color never -r "@" -T 'working_copies.join(",")' 2>/dev/null | sed 's/@$//')
+    jj_workspace=$(jj log --ignore-working-copy -n 1 --no-graph --color never -r "@" -T 'working_copies.join(",")' 2>/dev/null | sed 's/,/+/g')
     jj_desc=$(jj log --ignore-working-copy -n 1 --no-graph --color never -r "@" -T 'description.first_line().substr(0, 30)' 2>/dev/null)
 
     local bracket_content="${dev_sub}"
@@ -153,6 +154,10 @@ _ghostty_title_precmd() {
 }
 
 add-zsh-hook precmd _ghostty_title_precmd
+
+# jj shortcuts
+jd() { jj describe -m "$*"; }
+jn() { jj new -m "$*"; }
 
 ### jump function for enhanced ux around cd/z ###
 j() {
