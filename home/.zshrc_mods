@@ -158,6 +158,17 @@ add-zsh-hook precmd _ghostty_title_precmd
 # jj shortcuts
 jd() { jj describe -m "$*"; }
 jn() { jj new -m "$*"; }
+jb() { jj bookmark move "$1" --to @; }
+jp() {
+  local change="${1:-@}"
+  if [ -n "$2" ]; then
+    jj bookmark set "$2" -r "$change"
+    jj git push --bookmark "$2"
+  else
+    jj git push -c "$change"
+  fi
+}
+jr() { jj git fetch && jj rebase -d "${1:-main}@origin"; }
 
 ### jump function for enhanced ux around cd/z ###
 j() {

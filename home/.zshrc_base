@@ -7,7 +7,6 @@ plug "zap-zsh/supercharge"
 plug "zap-zsh/zap-prompt"
 plug "rkh/zsh-jj"
 plug "zsh-users/zsh-syntax-highlighting"
-plug "rt2zz/degit"
 
 # --- Completion System ---
 autoload -Uz compinit
