@@ -39,6 +39,14 @@ launchctl load ~/Library/LaunchAgents/dev.zee.periodic.plist
 ### end daily script ###
 
 
+### tools ###
+# Install fnm (Fast Node Manager)
+if ! command -v fnm &>/dev/null; then
+  curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell
+fi
+### end tools ###
+
+
 ### settings ###
 # Copy .zshrc
 cp "$REPO_ROOT/home/.zshrc" ~/.zshrc

@@ -1,6 +1,11 @@
 # Personal zsh modifications
 # Sourced from .zshrc after plugins are loaded
 
+# --- Profiling ---
+zsh_profile() {
+  ZPROF=1 zsh -i -c exit
+}
+
 # --- Keybindings ---
 bindkey '^[^M' autosuggest-execute
 
