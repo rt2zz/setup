@@ -22,6 +22,9 @@ clawd () {
   esac
 }
 
+# codex in full-auto mode
+alias clawdex='codex --full-auto'
+
 # Override zsh-jj's VCS_INFO_get_data_jj to also show workspace and commit description
 # The default plugin only shows bookmarks and change id. This adds:
 #   - workspace: which jj workspace you're in
@@ -166,11 +169,13 @@ jn() { jj new -m "$*"; }
 jb() { jj bookmark move "$1" --to @; }
 jp() {
   local change="${1:-@}"
-  if [ -n "$2" ]; then
-    jj bookmark set "$2" -r "$change"
-    jj git push --bookmark "$2"
+  local bookmark="$2"
+  shift 2 2>/dev/null || shift $#
+  if [ -n "$bookmark" ]; then
+    jj bookmark set "$bookmark" -r "$change" "$@"
+    jj git push --bookmark "$bookmark"
   else
-    jj git push -c "$change"
+    jj git push -c "$change" "$@"
   fi
 }
 jr() { jj git fetch && jj rebase -d "${1:-main}@origin"; }
