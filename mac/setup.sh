@@ -1,4 +1,9 @@
 #!/bin/bash
+# PREREQ
+# 1. merge "$REPO_ROOT/home/.zshrc" ->  ~/.zshrc
+# 2. install zoxide
+# 3. install zap
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 
