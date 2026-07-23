@@ -4,6 +4,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 
+# shellcheck source=mac/lib.sh
+source "$SCRIPT_DIR/lib.sh"
+
 ASSUME_YES=0
 DRY_RUN=0
 
@@ -47,14 +50,22 @@ fi
 
 file_sources=(
   "$REPO_ROOT/home/Library/Application Support/com.mitchellh.ghostty/config"
+  "$REPO_ROOT/home/.ssh/config.d/shared"
+  "$REPO_ROOT/home/.gitconfig"
+  "$REPO_ROOT/home/.config/jj/config.toml"
 )
 file_destinations=(
   "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
+  "$HOME/.ssh/config.d/shared"
+  "$HOME/.gitconfig"
+  "$HOME/.config/jj/config.toml"
 )
 
 directories=(
   "$HOME/Screenshots"
   "$HOME/Library/Application Support/com.mitchellh.ghostty"
+  "$HOME/.ssh/config.d"
+  "$HOME/.config/jj"
 )
 
 mac_defaults=(
@@ -70,6 +81,9 @@ mac_defaults=(
   "com.apple.screencapture|location|string|$HOME/Screenshots"
   "com.apple.finder|QLEnableTextSelection|bool|true"
   "com.apple.finder|AppleShowAllFiles|bool|true"
+  "NSGlobalDomain|com.apple.trackpad.scaling|float|0.875"
+  "NSGlobalDomain|com.apple.swipescrolldirection|bool|false"
+  "com.apple.Siri|StatusMenuVisible|bool|false"
 )
 
 raycast_defaults=(
@@ -118,12 +132,6 @@ normalize_current_value() {
   esac
 }
 
-redact_sensitive_diff() {
-  sed -E \
-    -e 's/((API|ACCESS|AUTH|PRIVATE|SECRET|SESSION|TOKEN|PASSWORD)[_A-Z0-9]*=)[^[:space:]]+/\1<redacted>/g' \
-    -e 's/(sk-[A-Za-z0-9._-]+)/<redacted-secret>/g'
-}
-
 setting_status() {
   local domain="$1"
   local key="$2"
@@ -161,7 +169,7 @@ preview_file_sync() {
 
   echo "Source:      $src"
   echo "Destination: $dest"
-  echo "Status:      $status"
+  echo "Status:      $(colorize_status "$status")"
 
   case "$status" in
     missing)
@@ -179,14 +187,14 @@ preview_directories() {
   local dir
   local status
 
-  echo "== Directories =="
+  header "Directories"
   for dir in "${directories[@]}"; do
     if [[ -d "$dir" ]]; then
       status="exists"
     else
       status="missing"
     fi
-    echo "$status: $dir"
+    echo "$(colorize_status "$status"): $dir"
   done
   echo
 }
@@ -203,7 +211,7 @@ preview_defaults_group() {
   local current
   local status
 
-  echo "== $title =="
+  header "$title"
   for setting in "${settings[@]}"; do
     IFS='|' read -r domain key type desired <<< "$setting"
     current="$(defaults read "$domain" "$key" 2>/dev/null || true)"
@@ -217,7 +225,7 @@ preview_defaults_group() {
     else
       echo "  Current: <missing>"
     fi
-    echo "  Status:  $status"
+    echo "  Status:  $(colorize_status "$status")"
   done
   echo
 }
@@ -225,7 +233,7 @@ preview_defaults_group() {
 preview_sync() {
   local i
 
-  echo "== Files =="
+  header "Files"
   for ((i = 0; i < ${#file_sources[@]}; i++)); do
     preview_file_sync "${file_sources[$i]}" "${file_destinations[$i]}"
   done
@@ -276,8 +284,9 @@ apply_sync() {
 
   killall Finder 2>/dev/null || true
   killall Dock 2>/dev/null || true
+  killall SystemUIServer 2>/dev/null || true
 
-  echo "Sync complete. Restart Raycast if its preference changes are not visible."
+  ok "Sync complete. Restart Raycast if its preference changes are not visible."
 }
 
 preview_sync
@@ -287,19 +296,9 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
   exit 0
 fi
 
-if [[ "$ASSUME_YES" -ne 1 ]]; then
-  if ! read -r -p "Apply these sync changes? [y/N] " answer; then
-    echo "Sync cancelled. No changes applied."
-    exit 0
-  fi
-  case "$answer" in
-    y|Y|yes|YES)
-      ;;
-    *)
-      echo "Sync cancelled. No changes applied."
-      exit 0
-      ;;
-  esac
+if ! confirm "Apply these sync changes?" y; then
+  skip "Sync cancelled. No changes applied."
+  exit 0
 fi
 
 apply_sync

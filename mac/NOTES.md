@@ -10,8 +10,12 @@
 
 ## Mac Settings
 ### UI Settings
-- update various trackpack and mouse gestures
-- reduce menu bar clutter
+- trackpad speed, scroll direction, and Siri menu bar visibility are managed
+  by `sync.sh` defaults
+- remaining manual steps: trackpad/mouse gestures not exposed via `defaults`,
+  Control Center menu bar modules
+- to discover a `defaults` key for a setting: `defaults read > /tmp/before`,
+  change the setting in System Settings, `defaults read | diff /tmp/before -`
 
 ## Raycast Settings
 - managed through curated `defaults` values only

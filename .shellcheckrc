@@ -1,0 +1,3 @@
+# SC2088: "Tilde does not expand in quotes" — we intentionally print ~/... in
+# user-facing messages.
+disable=SC2088
