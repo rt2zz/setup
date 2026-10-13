@@ -30,10 +30,6 @@ Apply without prompting:
 
 `./mac/sync.sh --yes`
 
-Raycast is managed through curated preferences only. App-support databases,
-caches, telemetry files, and account/device-specific state are intentionally
-excluded.
-
 `~/.zshrc` is bootstrapped by setup.sh and intentionally excluded from sync.sh
 because other installers append machine-specific shell config over time. If
 `~/.zshrc` already exists and differs, setup.sh shows a diff and asks before

@@ -86,18 +86,6 @@ mac_defaults=(
   "com.apple.Siri|StatusMenuVisible|bool|false"
 )
 
-raycast_defaults=(
-  "com.raycast.macos|raycastGlobalHotkey|string|Command-49"
-  "com.raycast.macos|raycastPreferredWindowMode|string|default"
-  "com.raycast.macos|raycastShouldFollowSystemAppearance|bool|true"
-  "com.raycast.macos|NSStatusItem Visible raycastIcon|bool|false"
-  "com.raycast.macos|mainWindow_isMonitoringGlobalHotkeys|bool|true"
-  "com.raycast.macos|fileSearch_fileSearchScope|string|kMDQueryScopeHome"
-  "com.raycast.macos|useHyperKeyIcon|bool|false"
-  "com.raycast.macos|faviconProvider|string|legacy"
-  "com.raycast.macos|floatingNotes_raycastNotesFormatBarVisible|bool|false"
-)
-
 normalize_desired_value() {
   local type="$1"
   local value="$2"
@@ -240,7 +228,6 @@ preview_sync() {
 
   preview_directories
   preview_defaults_group "macOS Defaults" "${mac_defaults[@]}"
-  preview_defaults_group "Raycast Defaults" "${raycast_defaults[@]}"
 }
 
 write_default() {
@@ -280,13 +267,12 @@ apply_sync() {
   done
 
   apply_defaults_group "${mac_defaults[@]}"
-  apply_defaults_group "${raycast_defaults[@]}"
 
   killall Finder 2>/dev/null || true
   killall Dock 2>/dev/null || true
   killall SystemUIServer 2>/dev/null || true
 
-  ok "Sync complete. Restart Raycast if its preference changes are not visible."
+  ok "Sync complete."
 }
 
 preview_sync

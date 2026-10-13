@@ -1,7 +1,7 @@
 # Mac Setup Notes
 - `setup.sh` installs launchd automation, runs the initial daily task, copies the bootstrap `.zshrc`, and invokes `sync.sh --yes`.
 - `sync.sh` previews file and defaults changes before applying them.
-- `sync.sh` copies managed app config, updates macOS defaults, and applies curated Raycast preferences.
+- `sync.sh` copies managed app config and updates macOS defaults.
 - `.zshrc` is intentionally excluded from `sync.sh` because installers append machine-specific shell config over time.
 
 ## Terminal Setup
@@ -16,7 +16,3 @@
   Control Center menu bar modules
 - to discover a `defaults` key for a setting: `defaults read > /tmp/before`,
   change the setting in System Settings, `defaults read | diff /tmp/before -`
-
-## Raycast Settings
-- managed through curated `defaults` values only
-- app-support databases, caches, telemetry files, and account/device-specific state are intentionally excluded

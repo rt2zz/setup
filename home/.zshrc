@@ -6,9 +6,10 @@
 
 
 # --- Personal Customizations ---
+# .profile first: it puts ~/.local/bin (zoxide) on PATH, which .zshrc_base needs
+source "$HOME/dev/setup/home/.profile"
 source "$HOME/dev/setup/home/.zshrc_base"
 source "$HOME/dev/setup/home/.zshrc_mods"
-source "$HOME/dev/setup/home/.profile"
 
 # Section where managed machine-specific config typically goes
 # --- bun ---
