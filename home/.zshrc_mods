@@ -8,6 +8,7 @@ zsh_profile() {
 
 # --- Keybindings ---
 bindkey '^[^M' autosuggest-execute
+bindkey '^[[3~' delete-char
 
 # claude in yolo mode
 clawd () {
@@ -60,9 +61,10 @@ zstyle ':vcs_info:jj:*' formats " %F{245}%m%f"
 dev_path_prompt() {
   local cwd="$PWD"
   local dev_prefix="$HOME/dev"
-  local purple="%{$fg[magenta]%}"
-  local cyan="%{$fg[cyan]%}"
-  local reset="%{$reset_color%}"
+  # Leave color expansion to PROMPT so zsh counts only visible columns.
+  local purple='%F{magenta}'
+  local cyan='%F{cyan}'
+  local reset='%f'
 
   if [[ "$cwd" == "$dev_prefix"/* ]]; then
     local rel="${cwd#$dev_prefix/}"
@@ -77,14 +79,14 @@ dev_path_prompt() {
     [[ -n "$jj_workspace" && "$jj_workspace" != "default" ]] && bracket_content+="·${jj_workspace}"
 
     if [[ "$dev_sub" == "$cwd_name" ]]; then
-      print -P "${purple}｢${bracket_content}｣${reset}"
+      print -r -- "${purple}｢${bracket_content//\%/%%}｣${reset}"
     else
-      print -P "${purple}｢${bracket_content}｣${reset} ${cyan}${cwd_name}${reset}"
+      print -r -- "${purple}｢${bracket_content//\%/%%}｣${reset} ${cyan}${cwd_name//\%/%%}${reset}"
     fi
   elif [[ "$cwd" == "$dev_prefix" ]]; then
-    print -P "${purple}｢dev｣${reset}"
+    print -r -- "${purple}｢dev｣${reset}"
   else
-    print -P "${cyan}%c${reset}"
+    print -r -- "${cyan}%c${reset}"
   fi
 }
 
