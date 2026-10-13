@@ -7,7 +7,8 @@ git clone https://github.com/rt2zz/setup.git ~/dev/setup
 cd ~/dev/setup && ./mac/setup.sh
 ```
 
-Then sign into Tailscale and iCloud. setup.sh prompts before each optional or
+Then sign into Tailscale and iCloud. Agents setting up a Mac: also see the
+Froggy section of [mac/NOTES.md](mac/NOTES.md). setup.sh prompts before each optional or
 destructive step (all prompts default to yes); pass `--yes` to run
 non-interactively.
 
