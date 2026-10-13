@@ -10,8 +10,10 @@
 
 ## Mac Settings
 ### UI Settings
-- trackpad speed, scroll direction, and Siri menu bar visibility are managed
-  by `sync.sh` defaults
+- trackpad speed, scroll direction, Siri menu bar visibility, and the menu bar
+  clock (24-hour time only; `ShowDate` 2 = never) are managed by `sync.sh`
+  defaults. macOS ignores a custom clock `DateFormat` now, so the clock's
+  parts are the only knobs
 - remaining manual steps: trackpad/mouse gestures not exposed via `defaults`,
   Control Center menu bar modules
 - to discover a `defaults` key for a setting: `defaults read > /tmp/before`,

@@ -91,6 +91,11 @@ mac_defaults=(
   "NSGlobalDomain|com.apple.trackpad.scaling|float|0.875"
   "NSGlobalDomain|com.apple.swipescrolldirection|bool|false"
   "com.apple.Siri|StatusMenuVisible|bool|false"
+  "com.apple.menuextra.clock|ShowDate|int|2"
+  "com.apple.menuextra.clock|ShowDayOfWeek|bool|false"
+  "com.apple.menuextra.clock|ShowAMPM|bool|false"
+  "com.apple.menuextra.clock|Show24Hour|bool|true"
+  "NSGlobalDomain|AppleICUForce24HourTime|bool|true"
 )
 
 normalize_desired_value() {
@@ -278,6 +283,7 @@ apply_sync() {
   killall Finder 2>/dev/null || true
   killall Dock 2>/dev/null || true
   killall SystemUIServer 2>/dev/null || true
+  killall ControlCenter 2>/dev/null || true
 
   ok "Sync complete."
 }
