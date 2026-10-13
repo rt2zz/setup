@@ -253,6 +253,18 @@ apply_defaults_group() {
   done
 }
 
+# KeyRepeat/InitialKeyRepeat only take effect at the next login. Push the same
+# timing into the live HID system too, so a fresh Mac has fast repeat now.
+# The defaults are in 1/60 s ticks; the HID properties are in nanoseconds.
+apply_key_repeat_now() {
+  local repeat initial
+  repeat="$(defaults read NSGlobalDomain KeyRepeat 2>/dev/null)" || return 0
+  initial="$(defaults read NSGlobalDomain InitialKeyRepeat 2>/dev/null)" || return 0
+  hidutil property --set "$(awk -v r="$repeat" -v i="$initial" \
+    'BEGIN { printf "{\"HIDKeyRepeat\":%d,\"HIDInitialKeyRepeat\":%d}", r * 1e9 / 60, i * 1e9 / 60 }')" \
+    >/dev/null 2>&1 || warn "Could not apply key repeat live; it takes effect at next login."
+}
+
 apply_sync() {
   local i
   local dir
@@ -271,6 +283,7 @@ apply_sync() {
   killall Finder 2>/dev/null || true
   killall Dock 2>/dev/null || true
   killall SystemUIServer 2>/dev/null || true
+  apply_key_repeat_now
 
   ok "Sync complete."
 }
