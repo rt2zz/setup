@@ -120,12 +120,22 @@ elif confirm "Install fnm (Fast Node Manager)?" y; then
   curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell
   ok "fnm installed"
 fi
+# --skip-shell leaves activation to us; without it there is no node on PATH.
+if grep -qF 'fnm env' "$HOME/.zshrc"; then
+  skip "fnm already activated in ~/.zshrc"
+else
+  printf '\n# fnm\neval "$(fnm env --use-on-cd --shell zsh)"\n' >> "$HOME/.zshrc"
+  ok "Added fnm activation to ~/.zshrc"
+fi
 
 if [[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/zap/zap.zsh" ]]; then
   skip "zap already installed"
 elif confirm "Install zap (zsh plugin manager)?" y; then
-  # --keep prevents zap's installer from replacing ~/.zshrc
-  zsh <(curl -fsSL https://raw.githubusercontent.com/zap-zsh/zap/master/install.sh) --branch release-v1 --keep
+  # --keep prevents zap's installer from replacing ~/.zshrc. Fetch first: a
+  # failed curl inside <(...) is invisible to set -e, and zsh then runs nothing.
+  zap_installer="$(curl -fsSL https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh)"
+  zsh -c "$zap_installer" zap-install --branch release-v1 --keep
+  [[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/zap/zap.zsh" ]] || { warn "zap install did not produce zap.zsh"; exit 1; }
   ok "zap installed"
 fi
 
