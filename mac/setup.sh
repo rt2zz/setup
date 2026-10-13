@@ -159,3 +159,5 @@ if [[ "$ASSUME_YES" -eq 1 ]]; then
 else
   "$REPO_ROOT/mac/sync.sh"
 fi
+
+warn "Log out and back in: key repeat and the other keyboard settings only take effect at login."
