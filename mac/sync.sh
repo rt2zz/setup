@@ -80,6 +80,8 @@ mac_defaults=(
   "NSGlobalDomain|NSAutomaticCapitalizationEnabled|bool|false"
   "NSGlobalDomain|NSAutomaticPeriodSubstitutionEnabled|bool|false"
   "NSGlobalDomain|AppleEnableSwipeNavigateWithScrolls|bool|false"
+  "NSGlobalDomain|NSAutomaticTextReplacementEnabled|bool|false"
+  "NSGlobalDomain|WebAutomaticTextReplacementEnabled|bool|false"
   "NSGlobalDomain|NSWindowResizeTime|float|0.001"
   "com.apple.dock|expose-animation-duration|float|0.1"
   "com.apple.finder|DisableAllAnimations|bool|true"
