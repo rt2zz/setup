@@ -91,6 +91,9 @@ mac_defaults=(
   "NSGlobalDomain|com.apple.trackpad.scaling|float|0.875"
   "NSGlobalDomain|com.apple.swipescrolldirection|bool|false"
   "com.apple.Siri|StatusMenuVisible|bool|false"
+  # Spotlight re-shows its icon on relaunch unless MenuItemHidden is set too.
+  "com.apple.Spotlight|MenuItemHidden|int|1"
+  "com.apple.Spotlight|NSStatusItem VisibleCC Item-0|bool|false"
   "com.apple.menuextra.clock|ShowDate|int|2"
   "com.apple.menuextra.clock|ShowDayOfWeek|bool|false"
   "com.apple.menuextra.clock|ShowAMPM|bool|false"
@@ -284,6 +287,7 @@ apply_sync() {
   killall Dock 2>/dev/null || true
   killall SystemUIServer 2>/dev/null || true
   killall ControlCenter 2>/dev/null || true
+  killall Spotlight 2>/dev/null || true
 
   ok "Sync complete."
 }
