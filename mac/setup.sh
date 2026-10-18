@@ -124,6 +124,7 @@ fi
 if grep -qF 'fnm env' "$HOME/.zshrc"; then
   skip "fnm already activated in ~/.zshrc"
 else
+  # shellcheck disable=SC2016 # literal $(...) written into ~/.zshrc
   printf '\n# fnm\neval "$(fnm env --use-on-cd --shell zsh)"\n' >> "$HOME/.zshrc"
   ok "Added fnm activation to ~/.zshrc"
 fi
