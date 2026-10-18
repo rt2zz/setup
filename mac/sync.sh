@@ -61,6 +61,15 @@ file_destinations=(
   "$HOME/.config/jj/config.toml"
 )
 
+# Ghostty only points TERMINFO at its bundle for shells it launches itself, so
+# an ssh session into this Mac from Ghostty (TERM=xterm-ghostty) gets broken
+# line editing unless the entry is in ~/.terminfo.
+ghostty_terminfo="/Applications/Ghostty.app/Contents/Resources/terminfo/78/xterm-ghostty"
+if [[ -f "$ghostty_terminfo" ]]; then
+  file_sources+=("$ghostty_terminfo")
+  file_destinations+=("$HOME/.terminfo/78/xterm-ghostty")
+fi
+
 # Root-owned files. Applied with sudo only when they differ.
 system_file_sources=(
   "$REPO_ROOT/system/etc/pam.d/sudo_local"
