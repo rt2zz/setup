@@ -20,7 +20,8 @@
   defaults. macOS ignores a custom clock `DateFormat` now, so the clock's
   parts are the only knobs
 - remaining manual steps: trackpad/mouse gestures not exposed via `defaults`,
-  Control Center menu bar modules
+  Control Center menu bar modules, disabling the Spotlight hotkey (Settings >
+  Keyboard > Shortcuts > Spotlight)
 - to discover a `defaults` key for a setting: `defaults read > /tmp/before`,
   change the setting in System Settings, `defaults read | diff /tmp/before -`
 
