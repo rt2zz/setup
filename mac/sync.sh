@@ -338,6 +338,10 @@ apply_sync() {
     cp "${file_sources[$i]}" "${file_destinations[$i]}"
   done
 
+  # git config --global writes to ~/.config/git/config when ~/.gitconfig is
+  # absent; keep ~/.gitconfig present so local writes never land in the synced file.
+  [[ -e "$HOME/.gitconfig" ]] || : > "$HOME/.gitconfig"
+
   for ((i = 0; i < ${#system_file_sources[@]}; i++)); do
     if system_file_supported "${system_file_destinations[$i]}" &&
       ! cmp -s "${system_file_sources[$i]}" "${system_file_destinations[$i]}"; then

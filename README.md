@@ -37,7 +37,16 @@ because other installers append machine-specific shell config over time. If
 `~/.zshrc` already exists and differs, setup.sh shows a diff and asks before
 overwriting; a timestamped backup is always created first.
 
-`~/.gitconfig` and `~/.config/jj/config.toml` are synced from `home/`.
+Shared git and jj config follow the same rule: sync owns a file the tool reads
+but never writes. `home/.config/git/config` is synced to `~/.config/git/config`,
+which git reads before `~/.gitconfig`. `home/.config/jj/conf.d/shared.toml` is
+synced to `~/.config/jj/conf.d/shared.toml`, which jj reads beside
+`config.toml`. `~/.gitconfig` and `~/.config/jj/config.toml` are machine-local
+and never synced: `git config --global`, `gh auth setup-git` and
+`jj config set --user` write there, and their values win over the shared ones
+(so a Mac can keep its own commit identity). `sync.sh` creates an empty
+`~/.gitconfig` if there is none, because without it `git config --global`
+would write into the synced file.
 
 Shared SSH config lives in `home/.ssh/config.d/shared` and is synced to
 `~/.ssh/config.d/shared`. First-time setup appends an
