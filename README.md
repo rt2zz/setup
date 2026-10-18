@@ -38,15 +38,18 @@ because other installers append machine-specific shell config over time. If
 overwriting; a timestamped backup is always created first.
 
 Shared git and jj config follow the same rule: sync owns a file the tool reads
-but never writes. `home/.config/git/config` is synced to `~/.config/git/config`,
-which git reads before `~/.gitconfig`. `home/.config/jj/conf.d/shared.toml` is
-synced to `~/.config/jj/conf.d/shared.toml`, which jj reads beside
-`config.toml`. `~/.gitconfig` and `~/.config/jj/config.toml` are machine-local
-and never synced: `git config --global`, `gh auth setup-git` and
-`jj config set --user` write there, and their values win over the shared ones
-(so a Mac can keep its own commit identity). `sync.sh` creates an empty
-`~/.gitconfig` if there is none, because without it `git config --global`
-would write into the synced file.
+but doesn't write to by default. `~/.gitconfig` and `~/.config/jj/config.toml`
+are machine-local and never synced, since `git config --global`,
+`gh auth setup-git` and `jj config set --user` write there.
+
+- git: `home/.config/git/config` is synced to `~/.config/git/config`. git reads
+  it before `~/.gitconfig`, so local values win (a Mac can keep its own commit
+  identity). `sync.sh` creates an empty `~/.gitconfig` if there is none, because
+  without it `git config --global` would write into the synced file.
+- jj: `home/.config/jj/conf.d/shared.toml` is synced to
+  `~/.config/jj/conf.d/shared.toml`. jj reads `conf.d/` *after* `config.toml`,
+  so shared values win there. To override one on a Mac, put it in
+  `~/.config/jj/conf.d/zz-local.toml`, which loads later.
 
 Shared SSH config lives in `home/.ssh/config.d/shared` and is synced to
 `~/.ssh/config.d/shared`. First-time setup appends an
