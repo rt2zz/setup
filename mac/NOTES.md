@@ -2,7 +2,12 @@
 - `setup.sh` installs launchd automation, runs the initial daily task, copies the bootstrap `.zshrc`, and invokes `sync.sh --yes`.
 - `sync.sh` previews file and defaults changes before applying them.
 - `sync.sh` copies managed app config and updates macOS defaults.
+- `sync.sh` installs root-owned files from `../system` with `sudo`, only when they differ.
 - `.zshrc` is intentionally excluded from `sync.sh` because installers append machine-specific shell config over time.
+
+## Touch ID sudo
+- `/etc/pam.d/sudo_local` adds `pam_tid.so`; it is included by `/etc/pam.d/sudo` on macOS 14+ and survives OS updates.
+- Inside tmux/screen-style multiplexers Touch ID falls back to password unless `pam_reattach` is installed (`brew install pam-reattach`) and listed before `pam_tid.so` in `sudo_local`.
 
 ## Terminal Setup
 - zsh with [zap](https://github.com/zap-zsh/zap) plugin manager

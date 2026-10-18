@@ -44,3 +44,7 @@ Shared SSH config lives in `home/.ssh/config.d/shared` and is synced to
 `Include ~/.ssh/config.d/shared` line to `~/.ssh/config`. Machine-specific
 host entries go above the Include; ssh uses the first value it finds per
 option, so local entries override shared ones.
+
+Touch ID for `sudo` is enabled by syncing `system/etc/pam.d/sudo_local` to
+`/etc/pam.d/sudo_local` (macOS 14+). Unlike `/etc/pam.d/sudo`, this file survives
+macOS updates. `sync.sh` only asks for your password when the file differs.

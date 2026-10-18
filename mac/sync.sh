@@ -61,6 +61,14 @@ file_destinations=(
   "$HOME/.config/jj/config.toml"
 )
 
+# Root-owned files. Applied with sudo only when they differ.
+system_file_sources=(
+  "$REPO_ROOT/system/etc/pam.d/sudo_local"
+)
+system_file_destinations=(
+  "/etc/pam.d/sudo_local"
+)
+
 directories=(
   "$HOME/Screenshots"
   "$HOME/Library/Application Support/com.mitchellh.ghostty"
@@ -186,6 +194,35 @@ preview_file_sync() {
   echo
 }
 
+system_file_supported() {
+  local dest="$1"
+
+  case "$dest" in
+    /etc/pam.d/sudo_local)
+      # macOS 14+ includes sudo_local from /etc/pam.d/sudo.
+      grep -q 'sudo_local' /etc/pam.d/sudo 2>/dev/null
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+}
+
+preview_system_files() {
+  local i
+
+  header "System Files (sudo)"
+  for ((i = 0; i < ${#system_file_sources[@]}; i++)); do
+    if system_file_supported "${system_file_destinations[$i]}"; then
+      preview_file_sync "${system_file_sources[$i]}" "${system_file_destinations[$i]}"
+    else
+      echo "Destination: ${system_file_destinations[$i]}"
+      echo "Status:      $(colorize_status unsupported) (macOS 14+ only; will skip)"
+      echo
+    fi
+  done
+}
+
 preview_directories() {
   local dir
   local status
@@ -241,6 +278,7 @@ preview_sync() {
     preview_file_sync "${file_sources[$i]}" "${file_destinations[$i]}"
   done
 
+  preview_system_files
   preview_directories
   preview_defaults_group "macOS Defaults" "${mac_defaults[@]}"
 }
@@ -279,6 +317,13 @@ apply_sync() {
   for ((i = 0; i < ${#file_sources[@]}; i++)); do
     mkdir -p "$(dirname "${file_destinations[$i]}")"
     cp "${file_sources[$i]}" "${file_destinations[$i]}"
+  done
+
+  for ((i = 0; i < ${#system_file_sources[@]}; i++)); do
+    if system_file_supported "${system_file_destinations[$i]}" &&
+      ! cmp -s "${system_file_sources[$i]}" "${system_file_destinations[$i]}"; then
+      sudo install -m 444 -o root -g wheel "${system_file_sources[$i]}" "${system_file_destinations[$i]}"
+    fi
   done
 
   apply_defaults_group "${mac_defaults[@]}"
