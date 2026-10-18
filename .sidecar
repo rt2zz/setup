@@ -1,0 +1,7 @@
+version = 1
+remote = "https://github.com/rt2zz/setup.git"
+path = "."
+branch = "main"
+inbox = "sidecar-inbox/{user}/{random}"
+redaction = "secrets"
+resolve = "fork"
