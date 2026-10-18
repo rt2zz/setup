@@ -48,17 +48,21 @@ if [[ "$ASSUME_YES" -eq 1 && "$DRY_RUN" -eq 1 ]]; then
   exit 2
 fi
 
+# Shared git and jj config go to files those tools read but never write:
+# git reads ~/.config/git/config before ~/.gitconfig, and jj reads conf.d/*.toml
+# beside config.toml. ~/.gitconfig and ~/.config/jj/config.toml stay
+# machine-local (gh credential helpers, identity overrides), and win on conflict.
 file_sources=(
   "$REPO_ROOT/home/Library/Application Support/com.mitchellh.ghostty/config"
   "$REPO_ROOT/home/.ssh/config.d/shared"
-  "$REPO_ROOT/home/.gitconfig"
-  "$REPO_ROOT/home/.config/jj/config.toml"
+  "$REPO_ROOT/home/.config/git/config"
+  "$REPO_ROOT/home/.config/jj/conf.d/shared.toml"
 )
 file_destinations=(
   "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
   "$HOME/.ssh/config.d/shared"
-  "$HOME/.gitconfig"
-  "$HOME/.config/jj/config.toml"
+  "$HOME/.config/git/config"
+  "$HOME/.config/jj/conf.d/shared.toml"
 )
 
 # Ghostty only points TERMINFO at its bundle for shells it launches itself, so
@@ -82,7 +86,8 @@ directories=(
   "$HOME/Screenshots"
   "$HOME/Library/Application Support/com.mitchellh.ghostty"
   "$HOME/.ssh/config.d"
-  "$HOME/.config/jj"
+  "$HOME/.config/git"
+  "$HOME/.config/jj/conf.d"
 )
 
 mac_defaults=(
@@ -286,6 +291,11 @@ preview_sync() {
   for ((i = 0; i < ${#file_sources[@]}; i++)); do
     preview_file_sync "${file_sources[$i]}" "${file_destinations[$i]}"
   done
+
+  if [[ ! -e "$HOME/.gitconfig" ]]; then
+    echo "$(colorize_status missing): $HOME/.gitconfig (will create empty, so git config --global and gh write there, not to the synced file)"
+    echo
+  fi
 
   preview_system_files
   preview_directories
