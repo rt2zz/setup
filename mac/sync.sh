@@ -48,10 +48,11 @@ if [[ "$ASSUME_YES" -eq 1 && "$DRY_RUN" -eq 1 ]]; then
   exit 2
 fi
 
-# Shared git and jj config go to files those tools read but never write:
-# git reads ~/.config/git/config before ~/.gitconfig, and jj reads conf.d/*.toml
-# beside config.toml. ~/.gitconfig and ~/.config/jj/config.toml stay
-# machine-local (gh credential helpers, identity overrides), and win on conflict.
+# Shared git and jj config go to files those tools read but don't write to by
+# default, so ~/.gitconfig and ~/.config/jj/config.toml stay machine-local (gh
+# credential helpers, git config --global, jj config set --user). git reads
+# ~/.config/git/config before ~/.gitconfig, so local wins. jj reads conf.d/*.toml
+# after config.toml, so shared wins; override it in conf.d/zz-local.toml.
 file_sources=(
   "$REPO_ROOT/home/Library/Application Support/com.mitchellh.ghostty/config"
   "$REPO_ROOT/home/.ssh/config.d/shared"
