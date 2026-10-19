@@ -72,3 +72,10 @@ sidecar supports review. Every Mac syncing this repo needs that sidecar before
 the policy goes on, because older versions ignore it and push as usual.
 `sidecar review` lists reviews; `sidecar review approve|reject <id>` decides
 one by hand.
+
+A REJECT or UNSURE verdict (or none) also starts a T3 thread on fox to sort it
+out with you, through a T3 webhook task ("sidecar review needs a person" in
+the setup project). Its URL is the credential, so it lives outside this repo,
+in `~/.config/setup/sidecar-review-webhook` (mode 600, a curl config:
+`url = "<webhook url>"`). Copy that file from another Mac when setting up a
+new one; without it the reviewer still decides, just with no thread.
