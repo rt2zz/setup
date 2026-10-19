@@ -48,47 +48,34 @@ if [[ "$ASSUME_YES" -eq 1 && "$DRY_RUN" -eq 1 ]]; then
   exit 2
 fi
 
+# Synced files, as "source|destination". Everything under home/ goes to the same
+# path under $HOME, and destination folders are created as needed.
+#
 # Shared git and jj config go to files those tools read but don't write to by
 # default, so ~/.gitconfig and ~/.config/jj/config.toml stay machine-local (gh
 # credential helpers, git config --global, jj config set --user). git reads
 # ~/.config/git/config before ~/.gitconfig, so local wins. jj reads conf.d/*.toml
 # after config.toml, so shared wins; override it in conf.d/zz-local.toml.
-file_sources=(
-  "$REPO_ROOT/home/Library/Application Support/com.mitchellh.ghostty/config"
-  "$REPO_ROOT/home/.ssh/config.d/shared"
-  "$REPO_ROOT/home/.config/git/config"
-  "$REPO_ROOT/home/.config/jj/conf.d/shared.toml"
-)
-file_destinations=(
-  "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
-  "$HOME/.ssh/config.d/shared"
-  "$HOME/.config/git/config"
-  "$HOME/.config/jj/conf.d/shared.toml"
-)
+files=()
+for f in \
+  "Library/Application Support/com.mitchellh.ghostty/config" \
+  ".ssh/config.d/shared" \
+  ".config/git/config" \
+  ".config/jj/conf.d/shared.toml"; do
+  files+=("$REPO_ROOT/home/$f|$HOME/$f")
+done
 
 # Ghostty only points TERMINFO at its bundle for shells it launches itself, so
 # an ssh session into this Mac from Ghostty (TERM=xterm-ghostty) gets broken
 # line editing unless the entry is in ~/.terminfo.
 ghostty_terminfo="/Applications/Ghostty.app/Contents/Resources/terminfo/78/xterm-ghostty"
 if [[ -f "$ghostty_terminfo" ]]; then
-  file_sources+=("$ghostty_terminfo")
-  file_destinations+=("$HOME/.terminfo/78/xterm-ghostty")
+  files+=("$ghostty_terminfo|$HOME/.terminfo/78/xterm-ghostty")
 fi
 
 # Root-owned files. Applied with sudo only when they differ.
-system_file_sources=(
-  "$REPO_ROOT/system/etc/pam.d/sudo_local"
-)
-system_file_destinations=(
-  "/etc/pam.d/sudo_local"
-)
-
-directories=(
-  "$HOME/Screenshots"
-  "$HOME/Library/Application Support/com.mitchellh.ghostty"
-  "$HOME/.ssh/config.d"
-  "$HOME/.config/git"
-  "$HOME/.config/jj/conf.d"
+system_files=(
+  "$REPO_ROOT/system/etc/pam.d/sudo_local|/etc/pam.d/sudo_local"
 )
 
 mac_defaults=(
@@ -129,56 +116,26 @@ mac_defaults=(
 # of .sidecar, so each Mac registers its own.
 sidecar_reviewer="$(printf '%q' "$REPO_ROOT/mac/sidecar-review.sh")"
 
-normalize_desired_value() {
-  local type="$1"
-  local value="$2"
-
-  case "$type:$value" in
-    bool:true)
+# defaults read prints bools as 1/0; the table above writes true/false.
+normalize_value() {
+  case "$1:$2" in
+    bool:true|bool:YES)
       echo "1"
       ;;
-    bool:false)
+    bool:false|bool:NO)
       echo "0"
       ;;
     *)
-      echo "$value"
+      echo "$2"
       ;;
   esac
 }
 
-normalize_current_value() {
-  local type="$1"
-  local value="$2"
-
-  case "$type:$value" in
-    bool:YES|bool:true)
-      echo "1"
-      ;;
-    bool:NO|bool:false)
-      echo "0"
-      ;;
-    *)
-      echo "$value"
-      ;;
-  esac
-}
-
+# setting_status <type> <current> <desired>
 setting_status() {
-  local domain="$1"
-  local key="$2"
-  local type="$3"
-  local desired="$4"
-  local current
-  local normalized_current
-  local normalized_desired
-
-  current="$(defaults read "$domain" "$key" 2>/dev/null || true)"
-  normalized_current="$(normalize_current_value "$type" "$current")"
-  normalized_desired="$(normalize_desired_value "$type" "$desired")"
-
-  if [[ -z "$current" ]]; then
+  if [[ -z "$2" ]]; then
     echo "missing"
-  elif [[ "$normalized_current" == "$normalized_desired" || "$current" == "$desired" ]]; then
+  elif [[ "$(normalize_value "$1" "$2")" == "$(normalize_value "$1" "$3")" ]]; then
     echo "unchanged"
   else
     echo "different"
@@ -229,63 +186,34 @@ system_file_supported() {
 }
 
 preview_system_files() {
-  local i
+  local pair src dest
 
   header "System Files (sudo)"
-  for ((i = 0; i < ${#system_file_sources[@]}; i++)); do
-    if system_file_supported "${system_file_destinations[$i]}"; then
-      preview_file_sync "${system_file_sources[$i]}" "${system_file_destinations[$i]}"
+  for pair in "${system_files[@]}"; do
+    src="${pair%%|*}" dest="${pair#*|}"
+    if system_file_supported "$dest"; then
+      preview_file_sync "$src" "$dest"
     else
-      echo "Destination: ${system_file_destinations[$i]}"
+      echo "Destination: $dest"
       echo "Status:      $(colorize_status unsupported) (macOS 14+ only; will skip)"
       echo
     fi
   done
 }
 
-preview_directories() {
-  local dir
-  local status
+preview_defaults() {
+  local setting domain key type desired current
 
-  header "Directories"
-  for dir in "${directories[@]}"; do
-    if [[ -d "$dir" ]]; then
-      status="exists"
-    else
-      status="missing"
-    fi
-    echo "$(colorize_status "$status"): $dir"
-  done
-  echo
-}
-
-preview_defaults_group() {
-  local title="$1"
-  shift
-  local settings=("$@")
-  local setting
-  local domain
-  local key
-  local type
-  local desired
-  local current
-  local status
-
-  header "$title"
-  for setting in "${settings[@]}"; do
+  header "macOS Defaults"
+  for setting in "${mac_defaults[@]}"; do
     IFS='|' read -r domain key type desired <<< "$setting"
     current="$(defaults read "$domain" "$key" 2>/dev/null || true)"
-    status="$(setting_status "$domain" "$key" "$type" "$desired")"
 
     echo "$domain $key"
     echo "  Type:    $type"
     echo "  Desired: $desired"
-    if [[ -n "$current" ]]; then
-      echo "  Current: $current"
-    else
-      echo "  Current: <missing>"
-    fi
-    echo "  Status:  $(colorize_status "$status")"
+    echo "  Current: ${current:-<missing>}"
+    echo "  Status:  $(colorize_status "$(setting_status "$type" "$current" "$desired")")"
   done
   echo
 }
@@ -331,11 +259,11 @@ preview_sidecar_reviewer() {
 }
 
 preview_sync() {
-  local i
+  local pair
 
   header "Files"
-  for ((i = 0; i < ${#file_sources[@]}; i++)); do
-    preview_file_sync "${file_sources[$i]}" "${file_destinations[$i]}"
+  for pair in "${files[@]}"; do
+    preview_file_sync "${pair%%|*}" "${pair#*|}"
   done
 
   if [[ ! -e "$HOME/.gitconfig" ]]; then
@@ -344,59 +272,51 @@ preview_sync() {
   fi
 
   preview_system_files
-  preview_directories
-  preview_defaults_group "macOS Defaults" "${mac_defaults[@]}"
+
+  header "Directories"
+  if [[ -d "$HOME/Screenshots" ]]; then
+    echo "$(colorize_status exists): $HOME/Screenshots"
+  else
+    echo "$(colorize_status missing): $HOME/Screenshots"
+  fi
+  echo
+
+  preview_defaults
   preview_sidecar_reviewer
 }
 
-write_default() {
-  local domain="$1"
-  local key="$2"
-  local type="$3"
-  local value="$4"
-
-  defaults write "$domain" "$key" "-$type" "$value"
-}
-
-apply_defaults_group() {
-  local settings=("$@")
-  local setting
-  local domain
-  local key
-  local type
-  local desired
-
-  for setting in "${settings[@]}"; do
-    IFS='|' read -r domain key type desired <<< "$setting"
-    write_default "$domain" "$key" "$type" "$desired"
-  done
-}
-
 apply_sync() {
-  local i
-  local dir
+  local pair src dest setting domain key type desired current
+  local defaults_changed=0
 
-  for dir in "${directories[@]}"; do
-    mkdir -p "$dir"
-  done
-
-  for ((i = 0; i < ${#file_sources[@]}; i++)); do
-    mkdir -p "$(dirname "${file_destinations[$i]}")"
-    cp "${file_sources[$i]}" "${file_destinations[$i]}"
+  for pair in "${files[@]}"; do
+    src="${pair%%|*}" dest="${pair#*|}"
+    mkdir -p "$(dirname "$dest")"
+    cp "$src" "$dest"
   done
 
   # git config --global writes to ~/.config/git/config when ~/.gitconfig is
   # absent; keep ~/.gitconfig present so local writes never land in the synced file.
   [[ -e "$HOME/.gitconfig" ]] || : > "$HOME/.gitconfig"
 
-  for ((i = 0; i < ${#system_file_sources[@]}; i++)); do
-    if system_file_supported "${system_file_destinations[$i]}" &&
-      ! cmp -s "${system_file_sources[$i]}" "${system_file_destinations[$i]}"; then
-      sudo install -m 444 -o root -g wheel "${system_file_sources[$i]}" "${system_file_destinations[$i]}"
+  for pair in "${system_files[@]}"; do
+    src="${pair%%|*}" dest="${pair#*|}"
+    if system_file_supported "$dest" && ! cmp -s "$src" "$dest"; then
+      sudo install -m 444 -o root -g wheel "$src" "$dest"
     fi
   done
 
-  apply_defaults_group "${mac_defaults[@]}"
+  # Screenshots land here (com.apple.screencapture location below).
+  mkdir -p "$HOME/Screenshots"
+
+  for setting in "${mac_defaults[@]}"; do
+    IFS='|' read -r domain key type desired <<< "$setting"
+    current="$(defaults read "$domain" "$key" 2>/dev/null || true)"
+    if [[ "$(setting_status "$type" "$current" "$desired")" != unchanged ]]; then
+      defaults write "$domain" "$key" "-$type" "$desired"
+      defaults_changed=1
+    fi
+  done
 
   case "$(sidecar_reviewer_status)" in
     missing|different)
@@ -404,11 +324,10 @@ apply_sync() {
       ;;
   esac
 
-  killall Finder 2>/dev/null || true
-  killall Dock 2>/dev/null || true
-  killall SystemUIServer 2>/dev/null || true
-  killall ControlCenter 2>/dev/null || true
-  killall Spotlight 2>/dev/null || true
+  # Restart what reads those defaults, only when one changed.
+  if [[ "$defaults_changed" -eq 1 ]]; then
+    killall Finder Dock SystemUIServer ControlCenter Spotlight 2>/dev/null || true
+  fi
 
   ok "Sync complete."
 }

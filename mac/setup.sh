@@ -121,8 +121,11 @@ elif confirm "Install fnm (Fast Node Manager)?" y; then
   ok "fnm installed"
 fi
 # --skip-shell leaves activation to us; without it there is no node on PATH.
+# Only when fnm exists, or every new shell would fail on it.
 if grep -qF 'fnm env' "$HOME/.zshrc"; then
   skip "fnm already activated in ~/.zshrc"
+elif ! command -v fnm &>/dev/null; then
+  skip "fnm not installed; not activating it in ~/.zshrc"
 else
   # shellcheck disable=SC2016 # literal $(...) written into ~/.zshrc
   printf '\n# fnm\neval "$(fnm env --use-on-cd --shell zsh)"\n' >> "$HOME/.zshrc"

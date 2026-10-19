@@ -1,0 +1,21 @@
+Scratch file for a sidecar review-gate stress test (2026-10-19). Safe to delete.
+burstA edit 1 at 05:47:16
+burstA edit 2 at 05:47:18
+burstA edit 3 at 05:47:19
+burstA edit 4 at 05:47:20
+burstA edit 5 at 05:47:21
+burstA edit 6 at 05:47:22
+burstA edit 7 at 05:47:24
+burstA edit 8 at 05:47:25
+burstA edit 9 at 05:47:26
+burstA edit 10 at 05:47:27
+burstA edit 11 at 05:47:28
+burstA edit 12 at 05:47:30
+burstA edit 13 at 05:47:31
+burstA edit 14 at 05:47:32
+burstA edit 15 at 05:47:33
+burstA edit 16 at 05:47:34
+burstA edit 17 at 05:47:36
+burstA edit 18 at 05:47:37
+burstA edit 19 at 05:47:38
+burstA edit 20 at 05:47:39
