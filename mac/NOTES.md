@@ -1,5 +1,5 @@
 # Mac Setup Notes
-- `setup.sh` installs launchd automation, runs the initial daily task, copies the bootstrap `.zshrc`, and invokes `sync.sh --yes`.
+- `setup.sh` installs launchd automation, runs the initial daily task, copies the bootstrap `.zshrc`, and then runs `sync.sh` (with `--yes` when setup.sh got `--yes`).
 - `sync.sh` previews file and defaults changes before applying them.
 - `sync.sh` copies managed app config and updates macOS defaults.
 - `sync.sh` installs root-owned files from `../system` with `sudo`, only when they differ.
