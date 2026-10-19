@@ -60,3 +60,15 @@ option, so local entries override shared ones.
 Touch ID for `sudo` is enabled by syncing `system/etc/pam.d/sudo_local` to
 `/etc/pam.d/sudo_local` (macOS 14+). Unlike `/etc/pam.d/sudo`, this file survives
 macOS updates. `sync.sh` only asks for your password when the file differs.
+
+## Publish review
+
+This repo is public and syncs itself, so sidecar can hold each change for a
+review before it leaves the Mac (`review = "required"` in `.sidecar`). The
+reviewer is `mac/sidecar-review.sh`: Claude reads the change with read-only
+tools against the guidance in `.sidecar-review` and approves or rejects it.
+`sync.sh` registers it with `sidecar review reviewer` once the installed
+sidecar supports review. Every Mac syncing this repo needs that sidecar before
+the policy goes on, because older versions ignore it and push as usual.
+`sidecar review` lists reviews; `sidecar review approve|reject <id>` decides
+one by hand.
