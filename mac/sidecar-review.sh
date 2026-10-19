@@ -19,7 +19,7 @@ reply=$(claude -p \
 You can read files but not run commands; this script records your decision.
 Read diff.patch and every file listed under opaque/, then end your reply with
 exactly one line: APPROVE, or REJECT: <file and what kind of content, without
-repeating it>") || exit 1
+repeating it>" </dev/null) || exit 1
 
 # Last non-empty line, without markdown emphasis or surrounding whitespace.
 verdict=$(printf '%s\n' "$reply" | sed -e 's/[*`]//g' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | grep -v '^$' | tail -n 1)
