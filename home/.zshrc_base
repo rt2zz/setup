@@ -1,13 +1,31 @@
-eval "$(zoxide init zsh)"
+# zsh_profile (in .zshrc_mods) sets ZPROF to time everything sourced after this.
+[[ -n "$ZPROF" ]] && zmodload zsh/zprof
+
+# Each tool is optional in mac/setup.sh, so skip what isn't installed.
+command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
 
 # --- Zap Plugin Manager ---
-[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/zap/zap.zsh" ] && source "${XDG_DATA_HOME:-$HOME/.local/share}/zap/zap.zsh"
-plug "zsh-users/zsh-autosuggestions"
-plug "zap-zsh/supercharge"
-plug "zap-zsh/zap-prompt"
-plug "rkh/zsh-jj"
-plug "zsh-users/zsh-syntax-highlighting"
+if [[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/zap/zap.zsh" ]]; then
+  source "${XDG_DATA_HOME:-$HOME/.local/share}/zap/zap.zsh"
+  plug "zsh-users/zsh-autosuggestions"
+  plug "zsh-users/zsh-syntax-highlighting"
+fi
 
-# --- Completion System ---
-autoload -Uz compinit
-compinit
+# --- Options and history ---
+unsetopt BEEP
+setopt AUTO_CD INTERACTIVE_COMMENTS
+
+HISTFILE="${ZDOTDIR:-$HOME}/.zsh_history"
+HISTSIZE=50000
+SAVEHIST=50000
+setopt APPEND_HISTORY EXTENDED_HISTORY HIST_EXPIRE_DUPS_FIRST HIST_IGNORE_DUPS \
+  HIST_IGNORE_ALL_DUPS HIST_FIND_NO_DUPS HIST_IGNORE_SPACE HIST_SAVE_NO_DUPS \
+  HIST_REDUCE_BLANKS HIST_VERIFY
+
+alias ls='ls -G'
+bindkey '^H' backward-kill-word # Ctrl + Backspace deletes a whole word.
+
+# --- No completion system ---
+# compinit is never loaded. Installers (bun) still append completion scripts to
+# ~/.zshrc that call compdef, so accept and ignore those calls.
+compdef() { :; }
