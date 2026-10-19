@@ -124,6 +124,11 @@ mac_defaults=(
   "NSGlobalDomain|AppleICUForce24HourTime|bool|true"
 )
 
+# sidecar runs this before publishing this repo when .sidecar sets
+# review = "required". The reviewer is machine-local sidecar config, not part
+# of .sidecar, so each Mac registers its own.
+sidecar_reviewer="$(printf '%q' "$REPO_ROOT/mac/sidecar-review.sh")"
+
 normalize_desired_value() {
   local type="$1"
   local value="$2"
@@ -285,6 +290,46 @@ preview_defaults_group() {
   echo
 }
 
+# Prints the configured reviewer; fails when sidecar is missing or predates review.
+current_sidecar_reviewer() {
+  command -v sidecar >/dev/null 2>&1 && sidecar review reviewer 2>/dev/null
+}
+
+sidecar_reviewer_status() {
+  local current
+
+  if ! current="$(current_sidecar_reviewer)"; then
+    echo "unsupported"
+  elif [[ "$current" == "$sidecar_reviewer" ]]; then
+    echo "unchanged"
+  elif [[ "$current" == "no reviewer configured" ]]; then
+    echo "missing"
+  else
+    echo "different"
+  fi
+}
+
+preview_sidecar_reviewer() {
+  local status
+
+  header "Sidecar Reviewer"
+  status="$(sidecar_reviewer_status)"
+  echo "Desired: $sidecar_reviewer"
+  case "$status" in
+    unsupported)
+      echo "Status:  $(colorize_status unsupported) (sidecar missing or without review; will skip)"
+      ;;
+    different)
+      echo "Current: $(current_sidecar_reviewer)"
+      echo "Status:  $(colorize_status different)"
+      ;;
+    *)
+      echo "Status:  $(colorize_status "$status")"
+      ;;
+  esac
+  echo
+}
+
 preview_sync() {
   local i
 
@@ -301,6 +346,7 @@ preview_sync() {
   preview_system_files
   preview_directories
   preview_defaults_group "macOS Defaults" "${mac_defaults[@]}"
+  preview_sidecar_reviewer
 }
 
 write_default() {
@@ -351,6 +397,12 @@ apply_sync() {
   done
 
   apply_defaults_group "${mac_defaults[@]}"
+
+  case "$(sidecar_reviewer_status)" in
+    missing|different)
+      sidecar review reviewer "$sidecar_reviewer"
+      ;;
+  esac
 
   killall Finder 2>/dev/null || true
   killall Dock 2>/dev/null || true
