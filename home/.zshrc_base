@@ -27,5 +27,7 @@ bindkey '^H' backward-kill-word # Ctrl + Backspace deletes a whole word.
 
 # --- No completion system ---
 # compinit is never loaded. Installers (bun) still append completion scripts to
-# ~/.zshrc that call compdef, so accept and ignore those calls.
+# ~/.zshrc that run compinit when it's undefined and then call compdef, so
+# stub both.
+compinit() { :; }
 compdef() { :; }
