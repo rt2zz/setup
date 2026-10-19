@@ -1,0 +1,15 @@
+This repo is public on GitHub: anyone can read what you approve.
+
+It holds machine setup for one person's Macs: shell, git, jj, ssh, and
+terminal config, macOS defaults, and the scripts that apply them. Expected and
+fine: tool names, package lists, aliases, short machine names (fox, ringtail,
+stout), the owner's GitHub username and the commit email already in the git
+and jj config, and environment variable names.
+
+Reject:
+
+- credential values, even partial or in an unusual format, and private key material
+- any other email address, phone numbers, street addresses, and other people's names
+- IP addresses, full tailnet hostnames (`*.ts.net`), and internal URLs
+- details about the owner's work, employers, clients, or other people's projects
+- notes or transcripts that read like private conversation
