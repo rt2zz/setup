@@ -59,7 +59,7 @@ _prompt_precmd() {
   if [[ -n "$label" ]]; then
     print -rn -- $'\e]2;'"$label${desc:+ $desc}"$'\a'
     where="%F{magenta}${label//\%/%%}%f"
-    [[ -n "$sub" && "${PWD:<SECRET>" != "$sub" ]] && where+=" %F{cyan}${${PWD:<SECRET>"
+    [[ -n "$sub" && "${PWD##*/}" != "$sub" ]] && where+=" %F{cyan}${${PWD##*/}//\%/%%}%f"
   else
     where="%F{cyan}%c%f"
   fi
