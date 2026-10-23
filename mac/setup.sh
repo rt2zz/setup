@@ -150,6 +150,16 @@ elif confirm "Install bun?" y; then
   ok "bun installed"
 fi
 
+# npm's half of the 7-day supply-chain cooldown (bun's and uv's are synced
+# files; see sync.sh). ~/.npmrc is machine-local because npm writes auth
+# tokens there, so append the one line. Needs npm 11; npm 10 ignores it.
+if grep -qE '^min-release-age=' "$HOME/.npmrc" 2>/dev/null; then
+  skip "npm min-release-age already set"
+else
+  printf 'min-release-age=7\n' >> "$HOME/.npmrc"
+  ok "Set npm min-release-age=7 in ~/.npmrc"
+fi
+
 if command -v zoxide &>/dev/null || [[ -x "$HOME/.local/bin/zoxide" ]]; then
   skip "zoxide already installed"
 elif confirm "Install zoxide?" y; then
