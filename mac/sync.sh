@@ -56,12 +56,17 @@ fi
 # credential helpers, git config --global, jj config set --user). git reads
 # ~/.config/git/config before ~/.gitconfig, so local wins. jj reads conf.d/*.toml
 # after config.toml, so shared wins; override it in conf.d/zz-local.toml.
+# ~/.bunfig.toml and ~/.config/uv/uv.toml carry the 7-day supply-chain
+# cooldown; npm's equivalent (min-release-age) lives in ~/.npmrc, which npm
+# writes (auth tokens), so setup.sh sets it per machine instead.
 files=()
 for f in \
   "Library/Application Support/com.mitchellh.ghostty/config" \
   ".ssh/config.d/shared" \
   ".config/git/config" \
-  ".config/jj/conf.d/shared.toml"; do
+  ".config/jj/conf.d/shared.toml" \
+  ".bunfig.toml" \
+  ".config/uv/uv.toml"; do
   files+=("$REPO_ROOT/home/$f|$HOME/$f")
 done
 

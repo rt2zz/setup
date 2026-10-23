@@ -1,0 +1,6 @@
+# Supply-chain cooldown, agreed with Zack 2026-10-23 (foxnet decisions.md):
+# don't resolve a package version until it has been public for 7 days. Synced
+# by mac/sync.sh to ~/.config/uv/uv.toml; uv reads it but never writes it.
+# One package that needs a newer version (an urgent security fix):
+#   uv lock --upgrade-package <pkg> --exclude-newer-package <pkg>=<now, RFC 3339>
+exclude-newer = "7 days"

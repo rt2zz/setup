@@ -1,0 +1,8 @@
+# Supply-chain cooldown, agreed with Zack 2026-10-23 (foxnet decisions.md):
+# don't install a package version until it has been public for 7 days, the
+# window in which most malicious releases are caught and pulled. Synced by
+# mac/sync.sh to ~/.bunfig.toml; bun reads it but never writes it.
+# One install that needs a newer version (an urgent security fix):
+#   bun add --minimum-release-age=0 <pkg>
+[install]
+minimumReleaseAge = 604800  # seconds
