@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "machine": "eleven@Foxs-Mac-mini",
+  "root": "/Users/eleven/dev/setup",
+  "inbox": "sidecar-inbox/eleven/aeb05f9f66e3",
+  "version": "2.1.2",
+  "status": "ok",
+  "updatedAt": "2026-10-24T11:53:27.660Z",
+  "lastSuccessAt": "2026-10-24T11:53:27.660Z",
+  "lastFailureAt": "2026-10-19T06:06:54.554Z",
+  "consecutiveFailures": 0
+}
