@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "machine": "zack@Zacks-MacBook-Air-8",
+  "root": "/Users/zack/dev/setup",
+  "inbox": "sidecar-inbox/zack/6eb62273cfa7",
+  "version": "2.1.2",
+  "status": "ok",
+  "updatedAt": "2026-10-31T20:52:32.476Z",
+  "lastSuccessAt": "2026-10-31T20:52:32.476Z",
+  "consecutiveFailures": 0
+}
