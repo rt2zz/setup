@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "machine": "zack@stout",
+  "root": "/Users/zack/dev/setup",
+  "inbox": "sidecar-inbox/zack/6eb62273cfa7",
+  "version": "2.1.2",
+  "status": "ok",
+  "updatedAt": "2026-11-14T12:26:54.500Z",
+  "lastSuccessAt": "2026-11-14T12:26:54.500Z",
+  "consecutiveFailures": 0
+}
