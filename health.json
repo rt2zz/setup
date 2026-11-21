@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "machine": "zack@ringtail",
+  "root": "/Users/zack/dev/setup",
+  "inbox": "sidecar-inbox/zack/40c1eb423118",
+  "version": "2.1.2",
+  "status": "ok",
+  "updatedAt": "2026-11-21T06:12:10.909Z",
+  "lastSuccessAt": "2026-11-21T06:12:10.909Z",
+  "lastFailureAt": "2026-11-19T14:18:38.632Z",
+  "consecutiveFailures": 0
+}
